@@ -18,6 +18,9 @@ typedef struct SuperThread_t {
   std::vector<MethodDecl> *atoms;
   int32_t threadsCount;
   std::vector<ThreadData> *threads;
+  uint8_t started;
+  uint32_t methodIndex;
+  CRITICAL_SECTION cs;
 } SuperThread;
 
 typedef SuperThread *PSuperThread;
