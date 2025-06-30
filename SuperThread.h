@@ -28,3 +28,4 @@ typedef SuperThread *PSuperThread;
 
 void thr_StartThreads(PSuperThread self);
 PSuperThread thr_Create(int32_t threadsCount);
+void thr_Register(PSuperThread self, void (*method)(PVOID), PVOID buffer);

@@ -41,7 +41,7 @@ uint8_t shouldRun(PSuperThread self) {
   return isStarted;
 }
 
-void thr_Register(PSuperThread self, PVOID (*method)(PVOID), PVOID buffer) {
+void thr_Register(PSuperThread self, void (*method)(PVOID), PVOID buffer) {
   self->atoms->push_back((MethodDecl) {
     .params = buffer,
     .method = (PVOID)method
@@ -62,7 +62,9 @@ void _threadAtom(PVOID selfBuffer) {
     if(!shouldRun(self)) {
       continue;
     }
-
+    MethodDecl currentA = (* self->atoms)[self->methodIndex];
+    void (*cMethod)(PVOID) = (void (*)(PVOID))currentA.method;
+    cMethod(currentA.params);
   }
 }
 
