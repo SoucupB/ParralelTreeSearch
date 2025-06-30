@@ -2,7 +2,7 @@
 #include "SuperThread.h"
 
 int main() {
-  thr_Create();
+  PSuperThread self = thr_Create(3);
   printf("YOLO\n");
   return 0;
 }

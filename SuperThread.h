@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <vector>
+#include <stdint.h>
 
 typedef struct MethodDecl_t {
   PVOID params;
@@ -9,11 +10,14 @@ typedef struct MethodDecl_t {
 } MethodDecl;
 
 #define Vects std::vector<MethodDecl> 
+#define VectINT std::vector<DWORD> 
 
 typedef struct SuperThread_t {
-  Vects atoms;
+  Vects *atoms;
+  VectINT *threadIDs;
+  int32_t totalThreadsSpawn;
 } SuperThread;
 
 typedef SuperThread *PSuperThread;
 
-PSuperThread thr_Create();
+PSuperThread thr_Create(int32_t totalThreadsSpawn);
