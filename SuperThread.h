@@ -17,6 +17,7 @@ typedef struct ThreadData_t {
 typedef struct SuperThread_t {
   std::vector<MethodDecl> *atoms;
   int32_t threadsCount;
+  int32_t currentThreads;
   std::vector<ThreadData> *threads;
   uint8_t started;
   uint32_t methodIndex;

@@ -10,6 +10,7 @@ PSuperThread thr_Create(int32_t threadsCount) {
   self->atoms = new std::vector<MethodDecl>();
   self->threads = new std::vector<ThreadData>();
   self->threadsCount = threadsCount;
+  self->currentThreads = 0;
   InitializeCriticalSection(&self->cs);
   return self;
 }
@@ -26,12 +27,11 @@ void thr_StartThreads(PSuperThread self) {
           (PVOID)self,
           0,
           &threadId);
+    self->threads->push_back((ThreadData) {
+      .threadID = threadId,
+      .threadHandle = hThread
+    });
   }
-
-  self->threads->push_back((ThreadData) {
-    .threadID = threadId,
-    .threadHandle = hThread
-  });
 }
 
 uint8_t shouldRun(PSuperThread self) {
@@ -39,6 +39,17 @@ uint8_t shouldRun(PSuperThread self) {
   uint8_t isStarted = self->started;
   LeaveCriticalSection(&self->cs);
   return isStarted;
+}
+
+void thr_Register(PSuperThread self, PVOID (*method)(PVOID), PVOID buffer) {
+  self->atoms->push_back((MethodDecl) {
+    .params = buffer,
+    .method = (PVOID)method
+  });
+}
+
+void thr_Run(PSuperThread self) {
+
 }
 
 void executeIndexesMethod(PSuperThread self) {
