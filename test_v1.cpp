@@ -61,7 +61,7 @@ BufferChecker createTestData(size_t sz, int32_t splitCount) {
 }
 
 void test_v1() {
-  PSuperThread thr = thr_Create(2);
+  PSuperThread thr = thr_Create(4);
   const size_t sz = 911222200;
   BufferChecker meta = createTestData(sz, 15);
   for(size_t i = 0; i < meta.intervalCount; i++) {
@@ -69,6 +69,7 @@ void test_v1() {
   }
   thr_Execute(thr);
   thr_Wait(thr);
+  thr_Delete(thr);
   printf("YOLO\n");
 }
 

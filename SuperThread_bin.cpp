@@ -55,9 +55,23 @@ void thr_Register(PSuperThread self, void (*method)(PVOID), PVOID buffer) {
   });
 }
 
+uint8_t shouldThreadCloseMethod(PSuperThread self) {
+  EnterCriticalSection(&self->cs);
+  if(self->shouldThreadClose) {
+    self->closeThreadsClosed++;
+    LeaveCriticalSection(&self->cs);
+    return 1;
+  }
+  LeaveCriticalSection(&self->cs);
+  return 0;
+}
+
 void _threadAtom(PVOID selfBuffer) {
   PSuperThread self = (PSuperThread)selfBuffer;
   while(1) {
+    if(shouldThreadCloseMethod(self)) {
+      return ;
+    }
     if(!shouldRun(self)) {
       continue;
     }
@@ -65,10 +79,11 @@ void _threadAtom(PVOID selfBuffer) {
     uint32_t currentIndex = self->methodIndex;
     self->methodIndex++;
     self->currentThreads++;
-    LeaveCriticalSection(&self->cs);
     if(currentIndex >= self->atoms->size()) {
+      LeaveCriticalSection(&self->cs);
       continue;
     }
+    LeaveCriticalSection(&self->cs);
     MethodDecl currentA = (*self->atoms)[currentIndex];
     void (*cMethod)(PVOID) = (void (*)(PVOID))currentA.method;
     cMethod(currentA.params);
@@ -79,6 +94,25 @@ void _threadAtom(PVOID selfBuffer) {
     self->currentThreads--;
     LeaveCriticalSection(&self->cs);
   }
+}
+
+void thr_Terminate(PSuperThread self) {
+  EnterCriticalSection(&self->cs);
+  self->shouldThreadClose = 1;
+  LeaveCriticalSection(&self->cs);
+  while(1) {
+    EnterCriticalSection(&self->cs);
+    uint8_t currentCloseCount = self->closeThreadsClosed;
+    LeaveCriticalSection(&self->cs);
+    if(currentCloseCount >= self->threadsCount) {
+      return ;
+    }
+  }
+}
+
+void thr_Delete(PSuperThread self) {
+  thr_Terminate(self);
+  free(self);
 }
 
 void thr_Wait(PSuperThread self) {

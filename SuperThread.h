@@ -22,6 +22,8 @@ typedef struct SuperThread_t {
   uint8_t started;
   uint32_t methodIndex;
   uint32_t totalThreadsRun;
+  uint8_t shouldThreadClose;
+  uint8_t closeThreadsClosed;
   CRITICAL_SECTION cs;
 } SuperThread;
 
@@ -32,3 +34,5 @@ PSuperThread thr_Create(int32_t threadsCount);
 void thr_Register(PSuperThread self, void (*method)(PVOID), PVOID buffer);
 void thr_Execute(PSuperThread self);
 void thr_Wait(PSuperThread self);
+void thr_Terminate(PSuperThread self);
+void thr_Delete(PSuperThread self);
