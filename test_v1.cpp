@@ -24,11 +24,11 @@ void searchElement(PVOID buffer) {
   Interval *interval = (Interval *)buffer;
   for(int32_t i = interval->left; i <= interval->right; i++) {
     if(interval->bufferChecker[i] == checker) {
-      printf("FOUND at interval %d\n", interval->intervalIndex);
+      printf("FOUND at interval %d %d\n", interval->intervalIndex, GetCurrentThreadId());
       return ;
     }
   }
-  printf("NOT found! %d\n", interval->intervalIndex);
+  printf("NOT found! %d %d\n", interval->intervalIndex, GetCurrentThreadId());
 }
 
 BufferChecker createTestData(size_t sz, int32_t splitCount) {
@@ -61,17 +61,15 @@ BufferChecker createTestData(size_t sz, int32_t splitCount) {
 }
 
 void test_v1() {
-  PSuperThread thr = thr_Create(3);
+  PSuperThread thr = thr_Create(2);
   const size_t sz = 911222200;
   BufferChecker meta = createTestData(sz, 15);
   for(size_t i = 0; i < meta.intervalCount; i++) {
     thr_Register(thr, searchElement, &meta.intervals[i]);
-    // printf("%d %d\n", meta.intervals[i].left, meta.intervals[i].right);
   }
   thr_Execute(thr);
   thr_Wait(thr);
   printf("YOLO\n");
-
 }
 
 int main() {
