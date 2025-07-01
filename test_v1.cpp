@@ -14,7 +14,7 @@ typedef struct BufferChecker_t {
   int32_t intervalCount;
 } BufferChecker;
 
-int32_t checker = 17;
+int32_t checker = 2532;
 
 uint32_t min(uint32_t a, uint32_t b) {
   return a < b ? a : b;
@@ -62,23 +62,13 @@ BufferChecker createTestData(size_t sz, int32_t splitCount) {
 
 void test_v1() {
   PSuperThread thr = thr_Create(1);
-  const size_t sz = 32;
-  BufferChecker meta = createTestData(32, 1);
+  const size_t sz = 3200;
+  BufferChecker meta = createTestData(sz, 3);
   printf("%d\n", meta.intervalCount);
   for(size_t i = 0; i < meta.intervalCount; i++) {
     thr_Register(thr, searchElement, &meta.intervals[i]);
     // printf("%d %d\n", meta.intervals[i].left, meta.intervals[i].right);
   }
-  // uint32_t *buff = (uint32_t *)malloc(sizeof(uint32_t) * sz);
-  // for(size_t i = 0; i < sz; i++) {
-  //   buff[i] = i;
-  // }
-  // intervals[0] = (Interval) {
-  //   .left = 0,
-  //   .right = sz - 1,
-  //   .bufferChecker = buff
-  // };
-  // thr_Register(thr, searchElement, &intervals[0]);
   thr_Execute(thr);
   thr_Wait(thr);
   printf("YOLO\n");
