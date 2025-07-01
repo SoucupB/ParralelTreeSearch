@@ -61,7 +61,7 @@ BufferChecker createTestData(size_t sz, int32_t splitCount) {
 }
 
 void test_v1() {
-  PSuperThread thr = thr_Create(1);
+  PSuperThread thr = thr_Create(2);
   const size_t sz = 3200;
   BufferChecker meta = createTestData(sz, 3);
   printf("%d\n", meta.intervalCount);

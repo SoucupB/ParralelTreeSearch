@@ -21,7 +21,7 @@ typedef struct SuperThread_t {
   std::vector<ThreadData> *threads;
   uint8_t started;
   uint32_t methodIndex;
-  uint8_t done;
+  uint32_t totalThreadsRun;
   CRITICAL_SECTION cs;
 } SuperThread;
 

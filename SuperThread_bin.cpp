@@ -43,8 +43,9 @@ uint8_t shouldRun(PSuperThread self) {
   uint32_t totalThreadCount = self->threadsCount;
   uint32_t currentThreadCount = self->currentThreads;
   uint8_t cnt = currentThreadCount < totalThreadCount;
+  uint8_t totalThreadsRun = self->totalThreadsRun;
   LeaveCriticalSection(&self->cs);
-  return !self->done && isStarted && cnt;
+  return totalThreadsRun < totalThreadCount && isStarted && cnt;
 }
 
 void thr_Register(PSuperThread self, void (*method)(PVOID), PVOID buffer) {
@@ -68,12 +69,12 @@ void _threadAtom(PVOID selfBuffer) {
     if(currentIndex >= self->atoms->size()) {
       continue;
     }
-    MethodDecl currentA = (* self->atoms)[currentIndex];
+    MethodDecl currentA = (*self->atoms)[currentIndex];
     void (*cMethod)(PVOID) = (void (*)(PVOID))currentA.method;
     cMethod(currentA.params);
     EnterCriticalSection(&self->cs);
     if(self->methodIndex >= self->atoms->size()) {
-      self->done = 1;
+      self->totalThreadsRun++;
     }
     self->currentThreads--;
     LeaveCriticalSection(&self->cs);
@@ -81,7 +82,7 @@ void _threadAtom(PVOID selfBuffer) {
 }
 
 void thr_Wait(PSuperThread self) {
-  while(!self->done);
+  while(self->totalThreadsRun < self->threadsCount);
 }
 
 void thr_Execute(PSuperThread self) {
