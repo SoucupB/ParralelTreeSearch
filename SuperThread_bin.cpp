@@ -4,14 +4,17 @@
 #include <string.h>
 
 void _threadAtom(PVOID selfBuffer);
+void thr_StartThreads(PSuperThread self);
 
 PSuperThread thr_Create(int32_t threadsCount) {
   PSuperThread self = (PSuperThread)malloc(sizeof(SuperThread));
+  memset(self, 0, sizeof(SuperThread));
   self->atoms = new std::vector<MethodDecl>();
   self->threads = new std::vector<ThreadData>();
   self->threadsCount = threadsCount;
   self->currentThreads = 0;
   InitializeCriticalSection(&self->cs);
+  thr_StartThreads(self);
   return self;
 }
 
@@ -37,8 +40,11 @@ void thr_StartThreads(PSuperThread self) {
 uint8_t shouldRun(PSuperThread self) {
   EnterCriticalSection(&self->cs);
   uint8_t isStarted = self->started;
+  uint32_t totalThreadCount = self->threadsCount;
+  uint32_t currentThreadCount = self->currentThreads;
+  uint8_t cnt = currentThreadCount < totalThreadCount;
   LeaveCriticalSection(&self->cs);
-  return isStarted;
+  return !self->done && isStarted && cnt;
 }
 
 void thr_Register(PSuperThread self, void (*method)(PVOID), PVOID buffer) {
@@ -48,24 +54,34 @@ void thr_Register(PSuperThread self, void (*method)(PVOID), PVOID buffer) {
   });
 }
 
-void thr_Run(PSuperThread self) {
-
-}
-
-void executeIndexesMethod(PSuperThread self) {
-  
-}
-
 void _threadAtom(PVOID selfBuffer) {
   PSuperThread self = (PSuperThread)selfBuffer;
   while(1) {
     if(!shouldRun(self)) {
       continue;
     }
-    MethodDecl currentA = (* self->atoms)[self->methodIndex];
+    EnterCriticalSection(&self->cs);
+    uint32_t currentIndex = self->methodIndex;
+    self->methodIndex++;
+    self->currentThreads++;
+    LeaveCriticalSection(&self->cs);
+    if(currentIndex >= self->atoms->size()) {
+      continue;
+    }
+    MethodDecl currentA = (* self->atoms)[currentIndex];
     void (*cMethod)(PVOID) = (void (*)(PVOID))currentA.method;
     cMethod(currentA.params);
+    EnterCriticalSection(&self->cs);
+    if(self->methodIndex >= self->atoms->size()) {
+      self->done = 1;
+    }
+    self->currentThreads--;
+    LeaveCriticalSection(&self->cs);
   }
+}
+
+void thr_Wait(PSuperThread self) {
+  while(!self->done);
 }
 
 void thr_Execute(PSuperThread self) {
