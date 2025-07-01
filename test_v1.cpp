@@ -64,7 +64,6 @@ void test_v1() {
   PSuperThread thr = thr_Create(3);
   const size_t sz = 911222200;
   BufferChecker meta = createTestData(sz, 15);
-  printf("%d\n", meta.intervalCount);
   for(size_t i = 0; i < meta.intervalCount; i++) {
     thr_Register(thr, searchElement, &meta.intervals[i]);
     // printf("%d %d\n", meta.intervals[i].left, meta.intervals[i].right);
