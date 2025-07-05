@@ -66,33 +66,54 @@ uint8_t shouldThreadCloseMethod(PSuperThread self) {
   return 0;
 }
 
+// void _threadAtom(PVOID selfBuffer) {
+//   PSuperThread self = (PSuperThread)selfBuffer;
+//   while(1) {
+//     if(shouldThreadCloseMethod(self)) {
+//       return ;
+//     }
+//     if(!shouldRun(self)) {
+//       continue;
+//     }
+//     EnterCriticalSection(&self->cs);
+//     uint32_t currentIndex = self->methodIndex;
+//     self->methodIndex++;
+//     self->currentThreads++;
+//     if(currentIndex >= self->atoms->size()) {
+//       LeaveCriticalSection(&self->cs);
+//       continue;
+//     }
+//     LeaveCriticalSection(&self->cs);
+//     MethodDecl currentA = (*self->atoms)[currentIndex];
+//     void (*cMethod)(PVOID) = (void (*)(PVOID))currentA.method;
+//     cMethod(currentA.params);
+//     EnterCriticalSection(&self->cs);
+//     if(self->methodIndex >= self->atoms->size()) {
+//       self->totalThreadsRun++;
+//     }
+//     self->currentThreads--;
+//     LeaveCriticalSection(&self->cs);
+//   }
+// }
 void _threadAtom(PVOID selfBuffer) {
   PSuperThread self = (PSuperThread)selfBuffer;
   while(1) {
     if(shouldThreadCloseMethod(self)) {
       return ;
     }
-    if(!shouldRun(self)) {
-      continue;
-    }
+    // if(!shouldRun(self)) {
+    //   continue;
+    // }
     EnterCriticalSection(&self->cs);
-    uint32_t currentIndex = self->methodIndex;
-    self->methodIndex++;
-    self->currentThreads++;
-    if(currentIndex >= self->atoms->size()) {
+    if(!self->atoms->size()) {
       LeaveCriticalSection(&self->cs);
       continue;
     }
+    MethodDecl currentA = (*self->atoms)[self->atoms->size() - 1];
+    self->atoms->pop_back();
     LeaveCriticalSection(&self->cs);
-    MethodDecl currentA = (*self->atoms)[currentIndex];
     void (*cMethod)(PVOID) = (void (*)(PVOID))currentA.method;
     cMethod(currentA.params);
-    EnterCriticalSection(&self->cs);
-    if(self->methodIndex >= self->atoms->size()) {
-      self->totalThreadsRun++;
-    }
-    self->currentThreads--;
-    LeaveCriticalSection(&self->cs);
   }
 }
 
@@ -116,7 +137,7 @@ void thr_Delete(PSuperThread self) {
 }
 
 void thr_Wait(PSuperThread self) {
-  while(self->totalThreadsRun < self->threadsCount);
+  while(self->atoms->size());
 }
 
 void thr_Execute(PSuperThread self) {
