@@ -75,7 +75,7 @@ void checkSum(BufferChecker meta, size_t sz) {
 }
 
 void test_v1() {
-  PSuperThread thr = thr_Create(1);
+  PSuperThread thr = thr_Create(3);
   const size_t sz = 899260024;
   BufferChecker meta = createTestData(sz, 11);
   for(size_t i = 0; i < meta.intervalCount; i++) {

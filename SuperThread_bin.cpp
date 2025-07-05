@@ -49,10 +49,12 @@ uint8_t shouldRun(PSuperThread self) {
 }
 
 void thr_Register(PSuperThread self, void (*method)(PVOID), PVOID buffer) {
+  EnterCriticalSection(&self->cs);
   self->atoms->push_back((MethodDecl) {
     .params = buffer,
     .method = (PVOID)method
   });
+  LeaveCriticalSection(&self->cs);
 }
 
 uint8_t shouldThreadCloseMethod(PSuperThread self) {
@@ -101,9 +103,6 @@ void _threadAtom(PVOID selfBuffer) {
     if(shouldThreadCloseMethod(self)) {
       return ;
     }
-    // if(!shouldRun(self)) {
-    //   continue;
-    // }
     EnterCriticalSection(&self->cs);
     if(!self->atoms->size()) {
       LeaveCriticalSection(&self->cs);
