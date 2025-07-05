@@ -10,6 +10,7 @@ PSuperThread thr_Create(int32_t threadsCount) {
   PSuperThread self = (PSuperThread)malloc(sizeof(SuperThread));
   memset(self, 0, sizeof(SuperThread));
   self->atoms = new std::vector<MethodDecl>();
+  self->atomsFinished = 0;
   self->threads = new std::vector<ThreadData>();
   self->threadsCount = threadsCount;
   self->currentThreads = 0;
@@ -40,12 +41,8 @@ void thr_StartThreads(PSuperThread self) {
 uint8_t shouldRun(PSuperThread self) {
   EnterCriticalSection(&self->cs);
   uint8_t isStarted = self->started;
-  uint32_t totalThreadCount = self->threadsCount;
-  uint32_t currentThreadCount = self->currentThreads;
-  uint8_t cnt = currentThreadCount < totalThreadCount;
-  uint8_t totalThreadsRun = self->totalThreadsRun;
   LeaveCriticalSection(&self->cs);
-  return totalThreadsRun < totalThreadCount && isStarted && cnt;
+  return isStarted;
 }
 
 void thr_Register(PSuperThread self, void (*method)(PVOID), PVOID buffer) {
@@ -54,6 +51,7 @@ void thr_Register(PSuperThread self, void (*method)(PVOID), PVOID buffer) {
     .params = buffer,
     .method = (PVOID)method
   });
+  self->atomsFinished++;
   LeaveCriticalSection(&self->cs);
 }
 
@@ -103,6 +101,9 @@ void _threadAtom(PVOID selfBuffer) {
     if(shouldThreadCloseMethod(self)) {
       return ;
     }
+    if(!shouldRun(self)) {
+      continue;
+    }
     EnterCriticalSection(&self->cs);
     if(!self->atoms->size()) {
       LeaveCriticalSection(&self->cs);
@@ -113,6 +114,9 @@ void _threadAtom(PVOID selfBuffer) {
     LeaveCriticalSection(&self->cs);
     void (*cMethod)(PVOID) = (void (*)(PVOID))currentA.method;
     cMethod(currentA.params);
+    EnterCriticalSection(&self->cs);
+    self->atomsFinished--;
+    LeaveCriticalSection(&self->cs);
   }
 }
 
@@ -136,7 +140,7 @@ void thr_Delete(PSuperThread self) {
 }
 
 void thr_Wait(PSuperThread self) {
-  while(self->atoms->size());
+  while(self->atomsFinished);
 }
 
 void thr_Execute(PSuperThread self) {
