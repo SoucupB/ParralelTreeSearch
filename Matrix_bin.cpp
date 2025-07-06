@@ -150,6 +150,21 @@ void matr_MatMul_Sync(PMatrix src, PMatrix adj, PMatrix dst) {
   }
 }
 
+void matr_RemoveThreadData(PMatrix self) {
+  if(self->width) {
+    free(self->threads->rows[0].pntRef);
+  }
+  free(self->threads->rows);
+}
+
+void matr_Delete(PMatrix self) {
+  if(self->threads) {
+    matr_RemoveThreadData(self);
+  }
+  free(self->buffer);
+  free(self);
+}
+
 void matr_MatMul(PMatrix src, PMatrix adjucant, PMatrix dst) {
   if(!src->threads) {
     matr_MatMul_Sync(src, adjucant, dst);

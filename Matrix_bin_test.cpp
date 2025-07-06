@@ -55,7 +55,7 @@ void test_v3() {
   PMatrix a = matr_Init(500, 5000);
   PMatrix b = matr_Init(500, 5000);
   PMatrix c = matr_Init(500, 5000);
-  PSuperThread thr = thr_Create(7);
+  PSuperThread thr = thr_Create(1);
   for(size_t i = 0; i < 500; i++) {
     for(size_t j = 0; j < 5000; j++) {
       matr_Set(a, i, j, (float)(j + i * 3));
@@ -71,6 +71,31 @@ void test_v3() {
   printf("Finished in %lld ms\n", GetTickCount64() - currentTime);
   helper_Test_Sum(a, b, c);
   thr_Delete(thr);
+}
+
+void test_v4() {
+  PMatrix a = matr_Init(500, 5000);
+  PMatrix b = matr_Init(500, 5000);
+  PMatrix c = matr_Init(500, 5000);
+  PSuperThread thr = thr_Create(1);
+  for(size_t i = 0; i < 500; i++) {
+    for(size_t j = 0; j < 5000; j++) {
+      matr_Set(a, i, j, (float)(j + i * 3));
+      matr_Set(b, i, j, (float)(j + i * 3));
+    }
+  }
+  matr_SetThreadNetwork(a, thr);
+  printf("Start checker\n");
+  uint64_t currentTime = GetTickCount64();
+  for(size_t i = 0; i < 1000; i++) {
+    matr_SumGlobal(a, b, c);
+  }
+  printf("Finished in %lld ms\n", GetTickCount64() - currentTime);
+  helper_Test_Sum(a, b, c);
+  thr_Delete(thr);
+  matr_Delete(a);
+  matr_Delete(b);
+  matr_Delete(c);
 }
 
 int main() {
