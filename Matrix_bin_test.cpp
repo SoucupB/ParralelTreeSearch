@@ -15,7 +15,7 @@ void test_v1() {
   matr_SumLocal(a, b);
   for(size_t i = 0; i < 3; i++) {
     for(size_t j = 0; j < 3; j++) {
-      assert(matr_Value(b, i, j) == 2.0f * (float)(j + i * 3));
+      assert(matr_Value(a, i, j) == 2.0f * (float)(j + i * 3));
     }
   }
 }
