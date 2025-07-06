@@ -141,11 +141,13 @@ void matr_MatMul_Sync(PMatrix src, PMatrix adj, PMatrix dst) {
   float *dstBufffer = dst->buffer;
   float *srcBufffer = src->buffer;
   float *adjBufffer = adj->buffer;
-  for(size_t i = 0, c = dst->width, v = src->height, l = src->width, z = adj->width; i < c; i++) {
-    for(size_t j = 0; j < v; j++) {
-      for(size_t p = 0; p < l; p++) {
-        dstBufffer[j + i * l] = srcBufffer[p + j * l] * adjBufffer[p * z + j];
+  for(size_t i = 0, srH = src->height, srW = src->width, adW = adj->width, adH = adj->height; i < src->height; i++) {
+    for(size_t j = 0, z = i * srW; j < srW; j++) {
+      float rowResult = 0.0f;
+      for(size_t k = 0; k < adH; k++) {
+        rowResult += srcBufffer[k + z] * adjBufffer[k * adW + j];  
       }
+      dstBufffer[j + i * srW] = rowResult;
     }
   }
 }
