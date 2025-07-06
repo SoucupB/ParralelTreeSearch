@@ -5,6 +5,7 @@
 typedef struct PntRef_t {
   float *dst;
   float *src;
+  float *secondDst;
   size_t colWidth;
 } PntRef;
 
@@ -37,4 +38,5 @@ PMatrix matr_Init(size_t height, size_t width);
 void matr_Set(PMatrix self, size_t i, size_t j, float value);
 void matr_SumLocal(PMatrix dst, PMatrix src);
 float matr_Value(PMatrix self, size_t i, size_t j);
+void matr_SumGlobal(PMatrix a, PMatrix b, PMatrix result);
 void matr_SetThreadNetwork(PMatrix self, PSuperThread thread);

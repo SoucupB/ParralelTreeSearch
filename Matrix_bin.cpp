@@ -90,3 +90,69 @@ void matr_SumLocal(PMatrix dst, PMatrix src) {
   }
   matr_SumLocal_Async(dst, src);
 }
+
+void matr_SumGlobal_Sync(PMatrix a, PMatrix b, PMatrix result) {
+  float *resultBuffer = result->buffer;
+  float *aBuffer = a->buffer;
+  float *bBuffer = b->buffer;
+  for(size_t i = 0, c = a->height * a->width; i < c; i++) {
+    resultBuffer[i] = aBuffer[i] + bBuffer[i];
+  }
+}
+
+void matr_Thread_GlobalAdder(PVOID adder) {
+  PThreadAtom slf = (PThreadAtom)adder;
+  float *a = slf->pntRef->src;
+  float *b = slf->pntRef->dst;
+  float *result = slf->pntRef->secondDst;
+  int32_t currentCol = slf->colIndex;
+  size_t c = slf->pntRef->colWidth;
+  size_t d = currentCol * c;
+  for(size_t i = 0, c = slf->pntRef->colWidth; i < c; i++) {
+    result[d + i] = a[d + i] + b[d + i];
+  }
+}
+
+void matr_SumGlobal_Async(PMatrix a, PMatrix b, PMatrix result) {
+  ThreadAtom currentThread = a->threads->rows[0];
+  currentThread.pntRef->dst = a->buffer;
+  currentThread.pntRef->src = b->buffer;
+  currentThread.pntRef->secondDst = result->buffer;
+  PSuperThread thread = a->threads->thr;
+  thr_Execute(thread);
+  for(size_t i = 0, c = a->height; i < c; i++) {
+    thr_Register(thread, matr_Thread_GlobalAdder, &a->threads->rows[i]);
+  }
+  thr_Wait(thread);
+}
+
+void matr_SumGlobal(PMatrix a, PMatrix b, PMatrix result) {
+  if(!a->height || !b->width || !result->width) {
+    return ;
+  }
+  if(!a->threads) {
+    matr_SumGlobal_Sync(a, b, result);
+    return ;
+  }
+  matr_SumGlobal_Async(a, b, result);
+}
+
+void matr_MatMul_Sync(PMatrix src, PMatrix adj, PMatrix dst) {
+  float *dstBufffer = dst->buffer;
+  float *srcBufffer = src->buffer;
+  float *adjBufffer = adj->buffer;
+  for(size_t i = 0, c = dst->width, v = src->height, l = src->width, z = adj->width; i < c; i++) {
+    for(size_t j = 0; j < v; j++) {
+      for(size_t p = 0; p < l; p++) {
+        dstBufffer[j + i * l] = srcBufffer[p + j * l] * adjBufffer[p * z + j];
+      }
+    }
+  }
+}
+
+void matr_MatMul(PMatrix src, PMatrix adjucant, PMatrix dst) {
+  if(!src->threads) {
+    matr_MatMul_Sync(src, adjucant, dst);
+    return ;
+  }
+}
