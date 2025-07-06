@@ -16,8 +16,10 @@ void matr_Thread_Adder(PVOID adder) {
   float *src = slf->pntRef->src;
   float *dst = slf->pntRef->dst;
   int32_t currentCol = slf->colIndex;
+  size_t c = slf->pntRef->colWidth;
+  size_t d = currentCol * c;
   for(size_t i = 0, c = slf->pntRef->colWidth; i < c; i++) {
-    dst[currentCol * c + i] += src[currentCol * c + i];
+    dst[d + i] += src[d + i];
   }
 }
 
@@ -67,15 +69,22 @@ void matr_SumLocal_Sync(PMatrix dst, PMatrix src) {
 }
 
 void matr_SumLocal_Async(PMatrix dst, PMatrix src) {
+  ThreadAtom currentThread = dst->threads->rows[0];
+  currentThread.pntRef->dst = dst->buffer;
+  currentThread.pntRef->src = src->buffer;
   PSuperThread thread = dst->threads->thr;
-  thr_StartThreads(thread);
+  thr_Execute(thread);
   for(size_t i = 0, c = dst->height; i < c; i++) {
     thr_Register(thread, matr_Thread_Adder, &dst->threads->rows[i]);
   }
+  thr_Wait(thread);
 }
 
 void matr_SumLocal(PMatrix dst, PMatrix src) {
-  if(!src->threads) {
+  if(!dst->height || !src->width) {
+    return ;
+  }
+  if(!dst->threads) {
     matr_SumLocal_Sync(dst, src);
     return ;
   }
