@@ -50,8 +50,8 @@ void thr_Register(PSuperThread self, void (*method)(PVOID), PVOID buffer) {
     .params = buffer,
     .method = (PVOID)method
   });
-  self->atomsFinished++;
   LeaveCriticalSection(&self->cs);
+  InterlockedIncrement(&self->atomsFinished);
 }
 
 uint8_t shouldThreadCloseMethod(PSuperThread self) {
@@ -84,9 +84,7 @@ void _threadAtom(PVOID selfBuffer) {
     LeaveCriticalSection(&self->cs);
     void (*cMethod)(PVOID) = (void (*)(PVOID))currentA.method;
     cMethod(currentA.params);
-    EnterCriticalSection(&self->cs);
-    self->atomsFinished--;
-    LeaveCriticalSection(&self->cs);
+    InterlockedDecrement(&self->atomsFinished);
   }
 }
 
@@ -110,7 +108,7 @@ void thr_Delete(PSuperThread self) {
 }
 
 void thr_Wait(PSuperThread self) {
-  while(self->atomsFinished);
+  while(InterlockedCompareExchange(&self->atomsFinished, 0, 0));
 }
 
 void thr_Execute(PSuperThread self) {
