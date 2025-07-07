@@ -13,7 +13,6 @@ PSuperThread thr_Create(int32_t threadsCount) {
   self->atomsFinished = 0;
   self->threads = new std::vector<ThreadData>();
   self->threadsCount = threadsCount;
-  self->currentThreads = 0;
   InitializeCriticalSection(&self->cs);
   thr_StartThreads(self);
   return self;
@@ -58,7 +57,7 @@ void thr_Register(PSuperThread self, void (*method)(PVOID), PVOID buffer) {
 uint8_t shouldThreadCloseMethod(PSuperThread self) {
   EnterCriticalSection(&self->cs);
   if(self->shouldThreadClose) {
-    self->closeThreadsClosed++;
+    self->closedThreadsClosed++;
     LeaveCriticalSection(&self->cs);
     return 1;
   }
@@ -97,7 +96,7 @@ void thr_Terminate(PSuperThread self) {
   LeaveCriticalSection(&self->cs);
   while(1) {
     EnterCriticalSection(&self->cs);
-    uint8_t currentCloseCount = self->closeThreadsClosed;
+    uint8_t currentCloseCount = self->closedThreadsClosed;
     LeaveCriticalSection(&self->cs);
     if(currentCloseCount >= self->threadsCount) {
       return ;
