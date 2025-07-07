@@ -173,9 +173,7 @@ void matr_Thread_GlobalMul(PVOID adder) {
   float *a = slf->pntRef->src;
   float *b = slf->pntRef->dst;
   float *result = slf->pntRef->secondDst;
-  size_t aHeight = slf->pntRef->aHeight;
   size_t aWidth = slf->pntRef->aWidth; 
-  size_t bHeight = slf->pntRef->bHeight;
   size_t bWidth = slf->pntRef->bWidth;
   int32_t aLine = slf->aLine;
   int32_t bCol = slf->bCol;
@@ -193,9 +191,7 @@ void matr_MatMul_Async(PMatrix src, PMatrix adjucant, PMatrix dst) {
   currentThreadData.src = src->buffer;
   currentThreadData.dst = adjucant->buffer;
   currentThreadData.secondDst = dst->buffer;
-  currentThreadData.aHeight = src->height;
   currentThreadData.aWidth = src->width;
-  currentThreadData.bHeight = adjucant->height;
   currentThreadData.bWidth = adjucant->width;
   PSuperThread thread = src->threads->thr;
   thr_Execute(thread);

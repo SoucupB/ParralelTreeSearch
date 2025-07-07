@@ -161,19 +161,19 @@ void test_v5() {
 }
 
 void test_v6() {
-  PMatrix a = matr_Init(50, 2200);
-  PMatrix b = matr_Init(2200, 50);
+  PMatrix a = matr_Init(50, 3200);
+  PMatrix b = matr_Init(3200, 50);
   PMatrix c = matr_Init(50, 50);
-  PSuperThread thr = thr_Create(1);
+  PSuperThread thr = thr_Create(2);
   size_t z = 1;
   for(size_t i = 0; i < 50; i++) {
-    for(size_t j = 0; j < 2200; j++) {
+    for(size_t j = 0; j < 3200; j++) {
       matr_Set(a, i, j, (float)z);
       z++;
     }
   }
   z = 1;
-  for(size_t i = 0; i < 2200; i++) {
+  for(size_t i = 0; i < 3200; i++) {
     for(size_t j = 0; j < 50; j++) {
       matr_Set(b, i, j, (float)z);
       z++;
@@ -182,7 +182,7 @@ void test_v6() {
   matr_SetThreadNetwork(a, thr);
   printf("Start checker\n");
   uint64_t currentTime = GetTickCount64();
-  for(size_t i = 0; i < 1; i++) {
+  for(size_t i = 0; i < 400; i++) {
     matr_MatMul(a, b, c);
   }
   printf("Finished in %lld ms\n", GetTickCount64() - currentTime);

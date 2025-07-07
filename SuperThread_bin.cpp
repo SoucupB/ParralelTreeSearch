@@ -66,43 +66,14 @@ uint8_t shouldThreadCloseMethod(PSuperThread self) {
   return 0;
 }
 
-// void _threadAtom(PVOID selfBuffer) {
-//   PSuperThread self = (PSuperThread)selfBuffer;
-//   while(1) {
-//     if(shouldThreadCloseMethod(self)) {
-//       return ;
-//     }
-//     if(!shouldRun(self)) {
-//       continue;
-//     }
-//     EnterCriticalSection(&self->cs);
-//     uint32_t currentIndex = self->methodIndex;
-//     self->methodIndex++;
-//     self->currentThreads++;
-//     if(currentIndex >= self->atoms->size()) {
-//       LeaveCriticalSection(&self->cs);
-//       continue;
-//     }
-//     LeaveCriticalSection(&self->cs);
-//     MethodDecl currentA = (*self->atoms)[currentIndex];
-//     void (*cMethod)(PVOID) = (void (*)(PVOID))currentA.method;
-//     cMethod(currentA.params);
-//     EnterCriticalSection(&self->cs);
-//     if(self->methodIndex >= self->atoms->size()) {
-//       self->totalThreadsRun++;
-//     }
-//     self->currentThreads--;
-//     LeaveCriticalSection(&self->cs);
-//   }
-// }
 void _threadAtom(PVOID selfBuffer) {
   PSuperThread self = (PSuperThread)selfBuffer;
   while(1) {
-    if(shouldThreadCloseMethod(self)) {
-      return ;
-    }
     if(!shouldRun(self)) {
       continue;
+    }
+    if(shouldThreadCloseMethod(self)) {
+      return ;
     }
     EnterCriticalSection(&self->cs);
     if(!self->atoms->size()) {
