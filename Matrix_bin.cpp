@@ -141,7 +141,7 @@ void matr_MatMul_Sync(PMatrix src, PMatrix adj, PMatrix dst) {
   float *dstBufffer = dst->buffer;
   float *srcBufffer = src->buffer;
   float *adjBufffer = adj->buffer;
-  for(size_t i = 0, srH = src->height, srW = src->width, adW = adj->width, adH = adj->height; i < src->height; i++) {
+  for(size_t i = 0, srH = src->height, srW = src->width, adW = adj->width, adH = adj->height; i < srH; i++) {
     for(size_t j = 0, z = i * srW; j < srW; j++) {
       float rowResult = 0.0f;
       for(size_t k = 0; k < adH; k++) {
@@ -167,9 +167,56 @@ void matr_Delete(PMatrix self) {
   free(self);
 }
 
+void matr_Thread_GlobalMul(PVOID adder) {
+  MulThreadAtom *slf = (MulThreadAtom *)adder;
+  float *a = slf->pntRef->src;
+  float *b = slf->pntRef->dst;
+  float *result = slf->pntRef->secondDst;
+  size_t aHeight = slf->pntRef->aHeight;
+  size_t aWidth = slf->pntRef->aWidth; 
+  size_t bHeight = slf->pntRef->bHeight;
+  size_t bWidth = slf->pntRef->bWidth;
+  int32_t aLine = slf->aLine;
+  int32_t bCol = slf->bCol;
+  float lValue = 0.0f;
+  for(size_t i = 0; i < aWidth; i++) {
+    lValue += a[i + aLine * aWidth] * b[i * bWidth + bCol];
+  }
+  result[slf->currentIndex] = lValue; 
+}
+
+void matr_MatMul_Async(PMatrix src, PMatrix adjucant, PMatrix dst) {
+  const size_t sz = src->height * adjucant->width;
+  MulThreadAtom currentBuffer[sz + 1];
+  MatMulRef currentThreadData;
+  currentThreadData.src = src->buffer;
+  currentThreadData.dst = adjucant->buffer;
+  currentThreadData.secondDst = dst->buffer;
+  currentThreadData.aHeight = src->height;
+  currentThreadData.aWidth = src->width;
+  currentThreadData.bHeight = adjucant->height;
+  currentThreadData.bWidth = adjucant->width;
+  PSuperThread thread = src->threads->thr;
+  thr_Execute(thread);
+  int32_t k = 0;
+  for(int32_t i = 0, c = src->height, v = adjucant->width; i < c; i++) {
+    for(int32_t j = 0; j < v; j++) {
+      currentBuffer[i] = (MulThreadAtom) {
+        .aLine = i,
+        .bCol = j,
+        .currentIndex = k++,
+        .pntRef = &currentThreadData
+      };
+      thr_Register(thread, matr_Thread_GlobalMul, &currentBuffer[i]);
+    }
+  }
+  thr_Wait(thread);
+}
+
 void matr_MatMul(PMatrix src, PMatrix adjucant, PMatrix dst) {
   if(!src->threads) {
     matr_MatMul_Sync(src, adjucant, dst);
     return ;
   }
+  matr_MatMul_Async(src, adjucant, dst);
 }

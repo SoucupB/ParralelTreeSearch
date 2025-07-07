@@ -18,6 +18,23 @@ typedef struct ThreadAtom_t {
 
 typedef ThreadAtom *PThreadAtom;
 
+typedef struct MatMulRef_t {
+  float *dst;
+  float *src;
+  float *secondDst;
+  size_t aWidth;
+  size_t bWidth;
+  size_t aHeight;
+  size_t bHeight;
+} MatMulRef;
+
+typedef struct MulThreadAtom_t {
+  int32_t aLine;
+  int32_t bCol;
+  int32_t currentIndex;
+  MatMulRef *pntRef;
+} MulThreadAtom;
+
 typedef struct MatrixThread_t {
   PSuperThread thr;
   ThreadAtom *rows;

@@ -55,7 +55,7 @@ void test_v3() {
   PMatrix a = matr_Init(50, 50);
   PMatrix b = matr_Init(50, 50);
   PMatrix c = matr_Init(50, 50);
-  PSuperThread thr = thr_Create(1);
+  PSuperThread thr = thr_Create(3);
   for(size_t i = 0; i < 50; i++) {
     for(size_t j = 0; j < 50; j++) {
       matr_Set(a, i, j, (float)(j + i * 3));
@@ -129,7 +129,7 @@ void test_v5() {
   // matr_SetThreadNetwork(a, thr);
   printf("Start checker\n");
   uint64_t currentTime = GetTickCount64();
-  for(size_t i = 0; i < 1000; i++) {
+  for(size_t i = 0; i < 8000; i++) {
     matr_MatMul(a, b, c);
   }
   printf("Finished in %lld ms\n", GetTickCount64() - currentTime);
