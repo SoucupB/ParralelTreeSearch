@@ -2,21 +2,29 @@
 #include "SuperThread.h"
 #include "Matrix.h"
 #include <assert.h>
+#include <math.h>
+
+#define EPSILON 1e-5
+
+#define FLOAT_EQL(x, y) (fabs(x - y) < EPSILON)
 
 void helper_Test_Sum(PMatrix a, PMatrix b, PMatrix result) {
   for(size_t i = 0; i < a->height; i++) {
     for(size_t j = 0; j < a->width; j++) {
-      assert(matr_Value(a, i, j) + matr_Value(b, i, j) == matr_Value(result, i, j));
+      assert(FLOAT_EQL(matr_Value(a, i, j) + matr_Value(b, i, j), matr_Value(result, i, j)));
     }
   }
 }
 
 void helper_Test_Sync(PMatrix a, PMatrix b, PMatrix result) {
   PMatrix secReview = matr_Init(a->height, b->width);
+  if(a->threads) {
+    matr_RemoveThreadData(a);
+  }
   a->threads = NULL;
   matr_MatMul(a, b, secReview);
   for(size_t i = 0; i < secReview->height * secReview->width; i++) {
-    assert(secReview->buffer[i] == result->buffer[i]);
+    assert(FLOAT_EQL(secReview->buffer[i], result->buffer[i]));
   }
   matr_Delete(secReview);
 }
@@ -164,7 +172,7 @@ void test_v6() {
   PMatrix a = matr_Init(50, 3200);
   PMatrix b = matr_Init(3200, 50);
   PMatrix c = matr_Init(50, 50);
-  PSuperThread thr = thr_Create(2);
+  PSuperThread thr = thr_Create(4);
   size_t z = 1;
   for(size_t i = 0; i < 50; i++) {
     for(size_t j = 0; j < 3200; j++) {
@@ -196,7 +204,7 @@ void test_v6() {
 int main() {
   // test_v1();
   // test_v2();
-  // test_v3();
+  test_v3();
   // test_v4();
   // test_v5();
   test_v6();

@@ -60,3 +60,4 @@ void matr_SetThreadNetwork(PMatrix self, PSuperThread thread);
 void matr_MatMul(PMatrix src, PMatrix adjucant, PMatrix dst);
 void matr_Delete(PMatrix self);
 void matr_Print(PMatrix self);
+void matr_RemoveThreadData(PMatrix self);
