@@ -45,10 +45,29 @@ GraphOutput graphElementSum(GraphInput input) {
   return response;
 }
 
-void printData(GraphOutput inp) {
-  
+void printData(GraphInput *inp, GraphOutput *out, size_t sz) {
+  FILE *fd = fopen("GraphData.out", "w+");
+  for(size_t i = 0; i < sz; i++) {
+    fprintf(fd, "%d %d %d %d %d\n", inp[i].matrixHeight, inp[i].matrixWidth, inp[i].threadCount, out[i].averageTimeParralel, out[i].averageTimeSync);
+  }
+  fclose(fd);
 }
 
 int main() {
+  GraphInput input[] = {
+    {
+      .matrixHeight = 10,
+      .matrixWidth = 10,
+      .threadCount = 2,
+      .repeats = 10000
+    }
+  };
+  GraphOutput output[1024];
+  size_t sz = sizeof(input) / sizeof(GraphInput);
+  for(size_t i = 0; i < sz; i++) {
+    output[i] = graphElementSum(input[i]);
+  }
+  printData(input, output, sz);
+  printf("Done\n");
   return 0;
 }
