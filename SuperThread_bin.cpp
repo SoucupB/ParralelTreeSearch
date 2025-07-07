@@ -104,6 +104,9 @@ void thr_Terminate(PSuperThread self) {
 
 void thr_Delete(PSuperThread self) {
   thr_Terminate(self);
+  for(size_t i = 0, c = self->threads->size(); i < c; i++) {
+    CloseHandle((*self->threads)[i].threadHandle);
+  }
   free(self);
 }
 
