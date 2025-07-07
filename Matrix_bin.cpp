@@ -201,13 +201,13 @@ void matr_MatMul_Async(PMatrix src, PMatrix adjucant, PMatrix dst) {
   int32_t k = 0;
   for(int32_t i = 0, c = src->height, v = adjucant->width; i < c; i++) {
     for(int32_t j = 0; j < v; j++) {
-      currentBuffer[i] = (MulThreadAtom) {
+      currentBuffer[k] = (MulThreadAtom) {
         .aLine = i,
         .bCol = j,
         .currentIndex = k++,
         .pntRef = &currentThreadData
       };
-      thr_Register(thread, matr_Thread_GlobalMul, &currentBuffer[i]);
+      thr_Register(thread, matr_Thread_GlobalMul, &currentBuffer[k]);
     }
   }
   thr_Wait(thread);

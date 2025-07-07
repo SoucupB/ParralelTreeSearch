@@ -150,12 +150,51 @@ void test_v5() {
   matr_Delete(c);
 }
 
+void test_v6() {
+  PMatrix a = matr_Init(3, 3);
+  PMatrix b = matr_Init(3, 3);
+  PMatrix c = matr_Init(3, 3);
+  PSuperThread thr = thr_Create(1);
+  size_t z = 1;
+  for(size_t i = 0; i < 3; i++) {
+    for(size_t j = 0; j < 3; j++) {
+      matr_Set(a, i, j, (float)z);
+      matr_Set(b, i, j, (float)z);
+      z++;
+    }
+  }
+  matr_SetThreadNetwork(a, thr);
+  printf("Start checker\n");
+  uint64_t currentTime = GetTickCount64();
+  for(size_t i = 0; i < 1; i++) {
+    matr_MatMul(a, b, c);
+  }
+  printf("Finished in %lld ms\n", GetTickCount64() - currentTime);
+  matr_Print(c);
+  assert(matr_Value(c, 0, 0) == 30.0f);
+  assert(matr_Value(c, 0, 1) == 36.0f);
+  assert(matr_Value(c, 0, 2) == 42.0f);
+
+  assert(matr_Value(c, 1, 0) == 66.0f);
+  assert(matr_Value(c, 1, 1) == 81.0f);
+  assert(matr_Value(c, 1, 2) == 96.0f);
+
+  assert(matr_Value(c, 2, 0) == 102.0f);
+  assert(matr_Value(c, 2, 1) == 126.0f);
+  assert(matr_Value(c, 2, 2) == 150.0f);
+  thr_Delete(thr);
+  matr_Delete(a);
+  matr_Delete(b);
+  matr_Delete(c);
+}
+
 int main() {
   // test_v1();
   // test_v2();
   // test_v3();
   // test_v4();
-  test_v5();
+  // test_v5();
+  test_v6();
   printf("Tests passed!\n");
   return 0;
 }
