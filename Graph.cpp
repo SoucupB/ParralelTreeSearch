@@ -37,11 +37,11 @@ GraphOutput graphElementSum(GraphInput input) {
     matr_SumGlobal(a, b, result);
   }
   response.averageTimeParralel = GetTickCount64() - currentTime;
-
   thr_Delete(thr);
   matr_Delete(a);
   matr_Delete(b);
   matr_Delete(result);
+  printf("Done once\n");
   return response;
 }
 
@@ -58,7 +58,25 @@ int main() {
     {
       .matrixHeight = 10,
       .matrixWidth = 10,
-      .threadCount = 2,
+      .threadCount = 3,
+      .repeats = 10000
+    },
+    {
+      .matrixHeight = 100,
+      .matrixWidth = 100,
+      .threadCount = 3,
+      .repeats = 10000
+    },
+    {
+      .matrixHeight = 300,
+      .matrixWidth = 300,
+      .threadCount = 3,
+      .repeats = 10000
+    },
+    {
+      .matrixHeight = 300,
+      .matrixWidth = 3000,
+      .threadCount = 3,
       .repeats = 10000
     }
   };
