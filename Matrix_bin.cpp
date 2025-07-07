@@ -1,5 +1,6 @@
 #include "Matrix.h"
 #include <string.h>
+#include <cassert>
 
 PMatrix matr_Init(size_t height, size_t width) {
   PMatrix self = (PMatrix)malloc(sizeof(Matrix));
@@ -127,9 +128,8 @@ void matr_SumGlobal_Async(PMatrix a, PMatrix b, PMatrix result) {
 }
 
 void matr_SumGlobal(PMatrix a, PMatrix b, PMatrix result) {
-  if(!a->height || !b->width || !result->width) {
-    return ;
-  }
+  assert(a->height && b->width && result->width);
+  assert(a->height == b->height && a->width == b->width && result->width == a->width && result->height == a->height);
   if(!a->threads) {
     matr_SumGlobal_Sync(a, b, result);
     return ;
@@ -211,6 +211,7 @@ void matr_MatMul_Async(PMatrix src, PMatrix adjucant, PMatrix dst) {
 }
 
 void matr_MatMul(PMatrix src, PMatrix adjucant, PMatrix dst) {
+  assert(src->width == adjucant->height && dst->height == src->height && dst->width == adjucant->width);
   if(!src->threads) {
     matr_MatMul_Sync(src, adjucant, dst);
     return ;
