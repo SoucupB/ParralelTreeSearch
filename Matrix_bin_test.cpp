@@ -11,6 +11,16 @@ void helper_Test_Sum(PMatrix a, PMatrix b, PMatrix result) {
   }
 }
 
+void helper_Test_Sync(PMatrix a, PMatrix b, PMatrix result) {
+  PMatrix secReview = matr_Init(a->height, b->width);
+  a->threads = NULL;
+  matr_MatMul(a, b, secReview);
+  for(size_t i = 0; i < secReview->height * secReview->width; i++) {
+    assert(secReview->buffer[i] == result->buffer[i]);
+  }
+  matr_Delete(secReview);
+}
+
 void test_v1() {
   PMatrix a = matr_Init(500, 500);
   PMatrix b = matr_Init(500, 500);
@@ -151,14 +161,20 @@ void test_v5() {
 }
 
 void test_v6() {
-  PMatrix a = matr_Init(3, 3);
-  PMatrix b = matr_Init(3, 3);
-  PMatrix c = matr_Init(3, 3);
+  PMatrix a = matr_Init(50, 2200);
+  PMatrix b = matr_Init(2200, 50);
+  PMatrix c = matr_Init(50, 50);
   PSuperThread thr = thr_Create(1);
   size_t z = 1;
-  for(size_t i = 0; i < 3; i++) {
-    for(size_t j = 0; j < 3; j++) {
+  for(size_t i = 0; i < 50; i++) {
+    for(size_t j = 0; j < 2200; j++) {
       matr_Set(a, i, j, (float)z);
+      z++;
+    }
+  }
+  z = 1;
+  for(size_t i = 0; i < 2200; i++) {
+    for(size_t j = 0; j < 50; j++) {
       matr_Set(b, i, j, (float)z);
       z++;
     }
@@ -170,18 +186,7 @@ void test_v6() {
     matr_MatMul(a, b, c);
   }
   printf("Finished in %lld ms\n", GetTickCount64() - currentTime);
-  matr_Print(c);
-  assert(matr_Value(c, 0, 0) == 30.0f);
-  assert(matr_Value(c, 0, 1) == 36.0f);
-  assert(matr_Value(c, 0, 2) == 42.0f);
-
-  assert(matr_Value(c, 1, 0) == 66.0f);
-  assert(matr_Value(c, 1, 1) == 81.0f);
-  assert(matr_Value(c, 1, 2) == 96.0f);
-
-  assert(matr_Value(c, 2, 0) == 102.0f);
-  assert(matr_Value(c, 2, 1) == 126.0f);
-  assert(matr_Value(c, 2, 2) == 150.0f);
+  helper_Test_Sync(a, b, c);
   thr_Delete(thr);
   matr_Delete(a);
   matr_Delete(b);
