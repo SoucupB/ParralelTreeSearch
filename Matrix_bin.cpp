@@ -210,6 +210,11 @@ void matr_MatMul_Async(PMatrix src, PMatrix adjucant, PMatrix dst) {
   thr_Wait(thread);
 }
 
+void matr_ClearThreadData(PMatrix self) {
+  matr_RemoveThreadData(self);
+  self->threads = NULL;
+}
+
 void matr_MatMul(PMatrix src, PMatrix adjucant, PMatrix dst) {
   assert(src->width == adjucant->height && dst->height == src->height && dst->width == adjucant->width);
   if(!src->threads) {

@@ -19,9 +19,8 @@ void helper_Test_Sum(PMatrix a, PMatrix b, PMatrix result) {
 void helper_Test_Sync(PMatrix a, PMatrix b, PMatrix result) {
   PMatrix secReview = matr_Init(a->height, b->width);
   if(a->threads) {
-    matr_RemoveThreadData(a);
+    matr_ClearThreadData(a);
   }
-  a->threads = NULL;
   matr_MatMul(a, b, secReview);
   for(size_t i = 0; i < secReview->height * secReview->width; i++) {
     assert(FLOAT_EQL(secReview->buffer[i], result->buffer[i]));
