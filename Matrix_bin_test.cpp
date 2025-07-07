@@ -56,7 +56,7 @@ void test_v2() {
       matr_Set(b, i, j, (float)(j + i * 3));
     }
   }
-  matr_SetThreadNetwork(a, thr);
+  matr_SetThread(a, thr);
   printf("Start checker\n");
   uint64_t currentTime = GetTickCount64();
   matr_SumLocal(a, b);
@@ -80,7 +80,7 @@ void test_v3() {
       matr_Set(b, i, j, (float)(j + i * 3));
     }
   }
-  matr_SetThreadNetwork(a, thr);
+  matr_SetThread(a, thr);
   printf("Start checker\n");
   uint64_t currentTime = GetTickCount64();
   for(size_t i = 0; i < 1000; i++) {
@@ -107,7 +107,7 @@ void test_v4() {
       z++;
     }
   }
-  // matr_SetThreadNetwork(a, thr);
+  // matr_SetThread(a, thr);
   printf("Start checker\n");
   uint64_t currentTime = GetTickCount64();
   for(size_t i = 0; i < 1; i++) {
@@ -144,7 +144,7 @@ void test_v5() {
       z++;
     }
   }
-  // matr_SetThreadNetwork(a, thr);
+  // matr_SetThread(a, thr);
   printf("Start checker\n");
   uint64_t currentTime = GetTickCount64();
   for(size_t i = 0; i < 8000; i++) {
@@ -187,7 +187,7 @@ void test_v6() {
       z++;
     }
   }
-  matr_SetThreadNetwork(a, thr);
+  matr_SetThread(a, thr);
   printf("Start checker\n");
   uint64_t currentTime = GetTickCount64();
   for(size_t i = 0; i < 400; i++) {

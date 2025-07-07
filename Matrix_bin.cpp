@@ -23,7 +23,7 @@ void matr_Thread_Adder(PVOID adder) {
   }
 }
 
-void matr_SetThreadNetwork(PMatrix self, PSuperThread thread) {
+void matr_SetThread(PMatrix self, PSuperThread thread) {
   if(self->threads) {
     self->threads->thr = thread;
     return ;

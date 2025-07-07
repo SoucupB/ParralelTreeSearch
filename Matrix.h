@@ -56,7 +56,7 @@ void matr_Set(PMatrix self, size_t i, size_t j, float value);
 void matr_SumLocal(PMatrix dst, PMatrix src);
 float matr_Value(PMatrix self, size_t i, size_t j);
 void matr_SumGlobal(PMatrix a, PMatrix b, PMatrix result);
-void matr_SetThreadNetwork(PMatrix self, PSuperThread thread);
+void matr_SetThread(PMatrix self, PSuperThread thread);
 void matr_MatMul(PMatrix src, PMatrix adjucant, PMatrix dst);
 void matr_Delete(PMatrix self);
 void matr_Print(PMatrix self);
