@@ -14,6 +14,7 @@ PSuperThread thr_Create(int32_t threadsCount) {
   self->threads = new std::vector<ThreadData>();
   self->threadsCount = threadsCount;
   self->startedThreads = 0;
+  self->counter = 0;
   InitializeCriticalSection(&self->cs);
   thr_StartThreads(self);
   return self;
@@ -47,11 +48,12 @@ void thr_StartThreads(PSuperThread self) {
   thr_WaitForThreadsStart(self);
 }
 
-uint8_t shouldRun(PSuperThread self) {
-  EnterCriticalSection(&self->cs);
-  uint8_t isStarted = self->started;
-  LeaveCriticalSection(&self->cs);
-  return isStarted;
+static inline uint8_t shouldRun(PSuperThread self) {
+  // EnterCriticalSection(&self->cs);
+  // uint8_t isStarted = self->started;
+  // LeaveCriticalSection(&self->cs);
+  // return isStarted;
+  return InterlockedCompareExchange(&self->started, 0, 0);
 }
 
 void thr_Register(PSuperThread self, void (*method)(PVOID), PVOID buffer) {
@@ -128,8 +130,6 @@ void thr_Wait(PSuperThread self) {
 }
 
 void thr_Execute(PSuperThread self) {
-  EnterCriticalSection(&self->cs);
-  self->started = 1;
-  LeaveCriticalSection(&self->cs);
+  InterlockedExchange(&self->started, 1);
 }
 

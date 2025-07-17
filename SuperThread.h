@@ -19,11 +19,11 @@ typedef struct SuperThread_t {
   volatile LONG atomsFinished;
   int32_t threadsCount;
   std::vector<ThreadData> *threads;
-  uint8_t started;
+  volatile LONG started;
   uint8_t shouldThreadClose;
   uint8_t closedThreadsClosed;
   uint8_t startedThreads;
-  volatile LONG counter = 0;
+  volatile LONG counter;
   CRITICAL_SECTION cs;
 } SuperThread;
 
