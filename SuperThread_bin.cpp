@@ -13,9 +13,18 @@ PSuperThread thr_Create(int32_t threadsCount) {
   self->atomsFinished = 0;
   self->threads = new std::vector<ThreadData>();
   self->threadsCount = threadsCount;
+  self->startedThreads = 0;
   InitializeCriticalSection(&self->cs);
   thr_StartThreads(self);
   return self;
+}
+
+void thr_WaitForThreadsStart(PSuperThread self) {
+  while(1) {
+    if(self->startedThreads == self->threads->size()) {
+      return ;
+    }
+  }
 }
 
 void thr_StartThreads(PSuperThread self) {
@@ -35,6 +44,7 @@ void thr_StartThreads(PSuperThread self) {
       .threadHandle = hThread
     });
   }
+  thr_WaitForThreadsStart(self);
 }
 
 uint8_t shouldRun(PSuperThread self) {
@@ -67,6 +77,9 @@ uint8_t shouldThreadCloseMethod(PSuperThread self) {
 
 void _threadAtom(PVOID selfBuffer) {
   PSuperThread self = (PSuperThread)selfBuffer;
+  EnterCriticalSection(&self->cs);
+  self->startedThreads++;
+  LeaveCriticalSection(&self->cs);
   while(1) {
     if(!shouldRun(self)) {
       continue;

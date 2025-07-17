@@ -22,6 +22,7 @@ typedef struct SuperThread_t {
   uint8_t started;
   uint8_t shouldThreadClose;
   uint8_t closedThreadsClosed;
+  uint8_t startedThreads;
   volatile LONG counter = 0;
   CRITICAL_SECTION cs;
 } SuperThread;

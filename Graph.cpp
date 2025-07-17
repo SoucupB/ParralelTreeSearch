@@ -30,7 +30,6 @@ GraphOutput graphElementSum(GraphInput input) {
     matr_SumGlobal(a, b, result);
   }
   response.averageTimeSync = GetTickCount64() - currentTime;
-
   matr_SetThread(a, thr);
   currentTime = GetTickCount64();
   for(size_t i = 0, c = input.repeats; i < c; i++) {
@@ -54,38 +53,62 @@ void printData(GraphInput *inp, GraphOutput *out, size_t sz) {
 }
 
 int main() {
-  GraphInput input[] = {
+  GraphInput input[1024] = {
     {
       .matrixHeight = 10,
       .matrixWidth = 10,
-      .threadCount = 3,
-      .repeats = 10000
+      .threadCount = 1,
+      .repeats = 1000
     },
     {
       .matrixHeight = 100,
       .matrixWidth = 100,
-      .threadCount = 3,
-      .repeats = 10000
+      .threadCount = 1,
+      .repeats = 1000
     },
     {
       .matrixHeight = 300,
       .matrixWidth = 300,
-      .threadCount = 3,
-      .repeats = 10000
+      .threadCount = 1,
+      .repeats = 1000
+    },
+    {
+      .matrixHeight = 30000,
+      .matrixWidth = 300,
+      .threadCount = 1,
+      .repeats = 1000
     },
     {
       .matrixHeight = 300,
-      .matrixWidth = 3000,
-      .threadCount = 3,
-      .repeats = 10000
+      .matrixWidth = 30000,
+      .threadCount = 1,
+      .repeats = 1000
+    },
+    {
+      .matrixHeight = 1,
+      .matrixWidth = 300000,
+      .threadCount = 1,
+      .repeats = 1000
+    },
+    {
+      .matrixHeight = 300000,
+      .matrixWidth = 1,
+      .threadCount = 1,
+      .repeats = 1000
     }
   };
   GraphOutput output[1024];
-  size_t sz = sizeof(input) / sizeof(GraphInput);
-  for(size_t i = 0; i < sz; i++) {
-    output[i] = graphElementSum(input[i]);
+  size_t sz = 7;
+  size_t k = 0;
+  for(size_t thrCount = 1; thrCount <= 4; thrCount++) {
+    for(size_t i = 0; i < sz; i++) {
+      input[k] = input[i];
+      input[k].threadCount = thrCount;
+      output[k] = graphElementSum(input[k]);
+      k++;
+    }
   }
-  printData(input, output, sz);
+  printData(input, output, k);
   printf("Done\n");
   return 0;
 }
